@@ -31,7 +31,7 @@ rag_project/
 │   ├── fichiers.md
 │   └── bases_de_donnees.md
 ├── faiss_index/            # Base vectorielle générée (créée automatiquement)
-├── build_index.py          # Script d'indexation (à lancer une seule fois)
+├── ingest.py          # Script d'indexation (à lancer une seule fois)
 ├── app.py                  # Application Streamlit (chatbot)
 └── README.md
 ```
@@ -86,7 +86,7 @@ http://localhost:8501
 
 ### Améliorer la vitesse de réponse
 - Utiliser un modèle Ollama plus léger (`llama3.2:1b`)
-- Réduire le nombre de chunks récupérés (`search_kwargs={"k": 2}`)
+- Réduire le nombre de chunks récupérés (`search_kwargs={"k": 3}`)
 - Réduire la taille des chunks (`chunk_size`)
 
 ## ⚠️ Points de vigilance
