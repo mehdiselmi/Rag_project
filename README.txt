@@ -25,9 +25,13 @@ questions des utilisateurs en se basant sur une base de connaissances interne
 
 ## 📁 Structure du projet
 ```
+
 rag_project/
 ├── docs/                   # Documents sources (.md, .pdf)
 │   ├── email.md
+|   ├──dns.md
+|   ├──ssl.md
+|   ├──wordpress.md
 │   ├── fichiers.md
 │   └── bases_de_donnees.md
 ├── faiss_index/            # Base vectorielle générée (créée automatiquement)
