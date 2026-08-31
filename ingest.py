@@ -2,57 +2,83 @@ import os
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-
 from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
+ 
 
-from langchain_community.document_loaders import PyPDFLoader 
+# 1. Définition du dossier contenant les documents sources
 
 DOCS_DIR = "docs"
+ 
+# Création du dossier s'il n'existe pas encore 
 if not os.path.exists(DOCS_DIR):
     os.makedirs(DOCS_DIR)
+ 
+print("📌 Chargement et analyse des documents (Markdown et PDF)...")
+ 
+documents = [] 
+ 
+ 
 
-print("📌 Loading and parsing documents (Markdown & PDF)...")
-
-documents = []
-
+# 2. Lecture de tous les fichiers du dossier "docs"
 
 for file_name in os.listdir(DOCS_DIR):
     file_path = os.path.join(DOCS_DIR, file_name)
-    
-   
+ 
+    #  fichier Markdown
     if file_name.endswith(".md"):
         with open(file_path, "r", encoding="utf-8") as f:
             text_content = f.read()
-            if text_content.strip(): 
-                documents.append(Document(page_content=text_content, metadata={"source": file_name}))
+            if text_content.strip():  # Ignore les fichiers vides
                 
-   
+                documents.append(Document(page_content=text_content, metadata={"source": file_name}))
+ 
+    # fichier PDF 
     elif file_name.endswith(".pdf"):
         try:
             loader = PyPDFLoader(file_path)
-            pdf_docs = loader.load() 
+            pdf_docs = loader.load()  
             documents.extend(pdf_docs)
-            print(f"✅ Successfully loaded PDF file: {file_name}")
+            print(f"✅ Fichier PDF chargé avec succès : {file_name}")
         except Exception as e:
-            print(f"❌ Error loading PDF {file_name}: {e}")
-
-print(f"📊 Total files found and loaded in memory: {len(documents)}")
-
+            print(f"❌ Erreur lors du chargement du PDF {file_name} : {e}")
+ 
+print(f"📊 Nombre total de fichiers trouvés et chargés en mémoire : {len(documents)}")
+ 
+# Arrêt du script si aucun document n'a été trouvé
 if len(documents) == 0:
-    print(f"❌ Error: No text or PDF found inside files in '{DOCS_DIR}'!")
+    print(f"❌ Erreur : aucun texte ni PDF trouvé dans le dossier '{DOCS_DIR}' !")
     exit()
+ 
+ 
 
+# 3. Découpage des documents en fragments (Chunks)
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=40)
 chunks = text_splitter.split_documents(documents)
-print(f"📊 Total chunks created: {len(chunks)}")
+print(f"📊 Nombre total de fragments (chunks) créés : {len(chunks)}")
+ 
+ 
 
-print("📌 Generating Embeddings using Sentence-Transformers directly...")
+# 4. Conversion de chaque fragment en vecteur (Embedding)
+
+print("📌 Génération des embeddings avec Sentence-Transformers...")
 
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+ 
+ 
 
-print("📌 Building and saving FAISS Vector Database...")
+# 5. Construction et sauvegarde de la base vectorielle FAISS
+
+print("📌 Construction et sauvegarde de la base vectorielle FAISS...")
+ 
+# FAISS.from_documents effectue automatiquement :
+
 db = FAISS.from_documents(chunks, embeddings)
-db.save_local("faiss_index")
+ 
+# Sauvegarde locale de l'index, afin de ne pas avoir à le reconstruire
 
-print("✅La base de donnees a ete cree et enregistree avec succes a partir de fichiers MD et PDF et associee à l'email !")
+db.save_local("faiss_index")
+ 
+print("✅ La base de données a été créée et enregistrée avec succès à partir des fichiers Markdown et PDF, conformément au projet !")
+ 
