@@ -2,7 +2,7 @@ import os
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 
 
@@ -21,14 +21,14 @@ for file_name in os.listdir(DOCS_DIR):
     file_path = os.path.join(DOCS_DIR, file_name)
 
     #2.1 fichiers Markdown
-    if file_name.endswith(".md"):
+    if file_name.lower().endswith(".md"):
         with open(file_path, "r", encoding="utf-8") as f:
             text_content = f.read()
             if text_content.strip():
                 documents.append(Document(page_content=text_content, metadata={"source": file_name}))
 
     #2.2 fichiers PDF
-    elif file_name.endswith(".pdf"):
+    elif file_name.lower().endswith(".pdf"):
         try:
             loader = PyPDFLoader(file_path)
             pdf_docs = loader.load()
@@ -44,7 +44,7 @@ if len(documents) == 0:
     exit()
 
 #3 Découpage des documents 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 chunks = text_splitter.split_documents(documents)
 print(f" Nombre total de chunks créés : {len(chunks)}")
 
